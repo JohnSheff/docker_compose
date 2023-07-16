@@ -1,0 +1,38 @@
+version: "3.9"
+services:
+  php:
+    build: .
+    container_name: php
+    restart: unless-stopped
+    volumes:
+      - ./www:/var/www
+    networks:
+      - myNetworkPractice
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+    depends_on:
+      - php
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./www:/var/www
+      - ./logs:/var/log/nginx
+    links:
+      - php
+    networks:
+      - myNetworkPractice
+    healthcheck:
+      test: curl -sS http://127.0.0.1 | grep -c works > /dev/null
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+networks:
+  myNetworkPractice:
+    driver: bridge
+
+    
